@@ -1,0 +1,2 @@
+clang++ src/*.cpp -o mymidisynth -Wno-c++11-extensions -Ilibs -Llibs -lsoundio -lrtmidi -lm
+export LD_LIBRARY_PATH=libs
