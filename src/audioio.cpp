@@ -99,8 +99,15 @@ int openAudioDevice( int device_index, void (*myfunc)(struct SoundIoOutStream *,
         fprintf(stderr, "unable to start device: %s\n", soundio_strerror(err));
         return 1;
     }
-	
-	return 0;
+
+    double latency;
+    if ((err = soundio_outstream_get_latency(outstream, &latency))) {
+ 	 std::cout << "no latency info: " << soundio_strerror(err) << std::endl;
+    }
+    else
+        std::cout << "getting latency: " << latency << std::endl;
+
+    return 0;
 }
 
 int closeAudioDevice()

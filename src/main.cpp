@@ -1,5 +1,6 @@
 #include "audioio.h"
 #include <algorithm>
+#include <string>
 
 bool must_exit = false;
 int frame = 0;
@@ -16,7 +17,7 @@ enum { SIN_WAVE, TRI_WAVE, SAW_WAVE, SQUARE_WAVE };
 int wave_form = SIN_WAVE;
 
 
-int AUDIO_WINDOW_SIZE = 512;
+int AUDIO_WINDOW_SIZE = 256;
 
 void midi_callback( double deltatime, std::vector< unsigned char > *message, void */*userData*/ )
 {
