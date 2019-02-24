@@ -68,7 +68,7 @@ int openAudioDevice( int device_index, void (*myfunc)(struct SoundIoOutStream *,
 		}
 	}    
 	
-	std::cout << "Output device index: " << device_index << std::endl;
+	//std::cout << "Output device index: " << device_index << std::endl;
 
     device = soundio_get_output_device( soundio, device_index );
     if (!device) {
@@ -84,6 +84,9 @@ int openAudioDevice( int device_index, void (*myfunc)(struct SoundIoOutStream *,
         return 1;
     }
     outstream->format = SoundIoFormatFloat32NE;
+	std::cout << "Layout: " << device->layouts[0].name << std::endl;
+	outstream->layout = device->layouts[0];
+
 	outstream->write_callback = myfunc;
 	outstream->underflow_callback = underflow_func;
 
@@ -100,12 +103,14 @@ int openAudioDevice( int device_index, void (*myfunc)(struct SoundIoOutStream *,
         return 1;
     }
 
+	/*
     double latency;
     if ((err = soundio_outstream_get_latency(outstream, &latency))) {
  	 std::cout << "no latency info: " << soundio_strerror(err) << std::endl;
     }
     else
-        std::cout << "getting latency: " << latency << std::endl;
+        std::cout << "Latency info: " << latency << std::endl;
+	*/
 
     return 0;
 }
@@ -162,16 +167,13 @@ int openMIDIPort( int index, void (*mycallback)(double, std::vector< unsigned ch
 		return 1;
 	}
 
-	if ( nPorts == 1 ) {
-		std::cout << "\nOpening " << midiin->getPortName() << std::endl;
-		index = 0;
+	if (nPorts <= index) {
+		std::cout << "Port not found!" << std::endl;
+		return 1;
 	}
-	else {
-		for ( i=0; i<nPorts; i++ ) {
-			portName = midiin->getPortName(i);
-			std::cout << "  Input port #" << i << ": " << portName << '\n';
-		}
-	}
+
+	portName = midiin->getPortName(index);
+	std::cout << "Input MIDI: " << portName << '\n';
 
 	midiin->openPort( index );    
 

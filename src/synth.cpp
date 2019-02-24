@@ -106,7 +106,7 @@ void Synth::generateOscillator(Oscillator& osc, AudioSpec& spec)
 		default:
 			break;
 	}
-	osc._phase = pos;
+	osc._phase = pos - int(pos);
 }
 
 void Synth::applyFilter( Oscillator& osc, AudioSpec& spec )
