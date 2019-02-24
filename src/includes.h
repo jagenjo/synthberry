@@ -23,3 +23,5 @@ static const float PI = 3.1415926535f;
 
 inline float clamp(float x, float a, float b) { return x < a ? a : (x > b ? b : x); }
 inline int clamp(int x, int a, int b) { return x < a ? a : (x > b ? b : x); }
+inline float lerp(float a, float b, float f) { return a * (1.0 - f) + b * f; }
+

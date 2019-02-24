@@ -7,21 +7,57 @@ struct SoundIo *soundio = NULL;
 struct SoundIoDevice *device = NULL;
 struct SoundIoOutStream *outstream = NULL;
 
+int initSoundIO()
+{
+	int err;
+
+	if (soundio)
+		return 0;
+
+	soundio = soundio_create();
+	if (!soundio) {
+		fprintf(stderr, "out of memory\n");
+		return 1;
+	}
+
+	if ((err = soundio_connect(soundio))) {
+		fprintf(stderr, "error connecting: %s\n", soundio_strerror(err));
+		return 1;
+	}
+	soundio_flush_events(soundio);
+
+	return 0;
+}
+
+void listAudioDevices()
+{
+	initSoundIO();
+
+	int num = soundio_output_device_count(soundio);
+	if (num < 1)
+	{
+		std::cout << "no devices found" << std::endl;
+		return;
+	}
+
+	for (int i = 0; i < num; ++i)
+	{
+		SoundIoDevice* device = soundio_get_output_device(soundio, i);
+		std::cout << "\t" << i << ".- " << device->name << " :: " << device->software_latency_current << std::endl;
+	}
+}
+
+
+static void underflow_func( struct SoundIoOutStream *outstream ) {
+	static int count = 0;
+	fprintf(stderr, "underflow %d\n", ++count);
+}
+
+
 int openAudioDevice( int device_index, void (*myfunc)(struct SoundIoOutStream *,int,int) )
 {
     int err;
-    soundio = soundio_create();
-    if (!soundio) {
-        fprintf(stderr, "out of memory\n");
-        return 1;
-    }
-
-    if ((err = soundio_connect(soundio))) {
-        fprintf(stderr, "error connecting: %s\n", soundio_strerror(err));
-        return 1;
-    }
-
-    soundio_flush_events(soundio);
+	initSoundIO();
 
 	if( device_index == -1 )
 	{
@@ -48,7 +84,8 @@ int openAudioDevice( int device_index, void (*myfunc)(struct SoundIoOutStream *,
         return 1;
     }
     outstream->format = SoundIoFormatFloat32NE;
-    outstream->write_callback = myfunc;
+	outstream->write_callback = myfunc;
+	outstream->underflow_callback = underflow_func;
 
     if ((err = soundio_outstream_open(outstream))) {
         fprintf(stderr, "unable to open device: %s", soundio_strerror(err));
@@ -62,22 +99,52 @@ int openAudioDevice( int device_index, void (*myfunc)(struct SoundIoOutStream *,
         fprintf(stderr, "unable to start device: %s\n", soundio_strerror(err));
         return 1;
     }
+	
 	return 0;
 }
 
 int closeAudioDevice()
 {
+	
 	printf("app end");
     soundio_outstream_destroy(outstream);
     soundio_device_unref(device);
     soundio_destroy(soundio);
+	
     return 0;
 }
 
 
+
+void initRTMIDI()
+{
+	if (midiin)
+		return;
+
+	midiin = new RtMidiIn();
+}
+
+
+void listMIDIDevices()
+{
+	initRTMIDI();
+
+	unsigned int i = 0, nPorts = midiin->getPortCount();
+	if (nPorts == 0) {
+		std::cout << "No MIDI input ports available" << std::endl;
+		return;
+	}
+
+	std::string portName;
+	for (i = 0; i<nPorts; i++) {
+		portName = midiin->getPortName(i);
+		std::cout << "\t" << i << ": " << portName << '\n';
+	}
+}
+
 int openMIDIPort( int index, void (*mycallback)(double, std::vector< unsigned char > *, void *) )
 {
-    midiin = new RtMidiIn();
+    initRTMIDI();
     
 	//rtmidi->openVirtualPort();
 
@@ -108,13 +175,12 @@ int openMIDIPort( int index, void (*mycallback)(double, std::vector< unsigned ch
 
     // Don't ignore sysex, timing, or active sensing messages.
     midiin->ignoreTypes( false, false, false );
-
 	return 0;
 }
 
 int closeMIDIPort()
 {
-
+	return 1;
 }
 
 
