@@ -1,8 +1,14 @@
 # synthberry
-A commandline synthetizer with MIDI support for the Raspberry Pi.
+A commandline audio synthetizer with MIDI support for the Raspberry Pi.
 
-The synth can be configured from a config file to create presets.
+The synth patches are loaded from a text file that specifies how the audio must be created:
 
-It can be add on the RPi startup sequence so you do not need to plug any keyboard, just power it and plug your MIDI keyboard.
+```
+patch1:
+voices=4
+portamento=0.1
+//audio setup
+ADSR( OSC("SQUARE", pitch,0.4) , 0.2, CC[3], 0.5, 0.3 );
+```
 
 
