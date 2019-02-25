@@ -8,7 +8,8 @@ patch1:
 voices=4
 portamento=0.1
 //audio setup
-ADSR( OSC("SQUARE", pitch,0.4) , 0.2, CC[3], 0.5, 0.3 );
+decay=MIDICC[3]
+ADSR( OSC("SQUARE", pitch,0.4) , 0.2, decay, 0.5, 0.3 );
 ```
 
 
